@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+import math
+import struct
+import pyaudio
+
+def play_tone(frequency, amplitude, duration, fs, stream):
+	N = int(fs / frequency)
+	T = int(frequency * duration)  # repeat for T cycles
+	dt = 1.0 / fs
+	# 1 cycle
+	tone = (amplitude * math.sin(2 * math.pi * frequency * n * dt) for n in xrange(N))
+	# todo: get the format from the stream; this assumes Float32
+	data = ''.join(struct.pack('f', samp) for samp in tone)
+	for n in xrange(T):
+		stream.write(data)
+
+def to_morse(s):
+	keys = {"a": ". -",
+			"b": "- . . .",
+			"c": "- . - .",
+			"d": "- . .",
+			"e": ".",
+			"f": ". . - .",
+			"g": "- -.",
+			"h": ". . . .",
+			"i": ". .",
+			"j": ".- - -",
+			"k": "- . -",
+			"l": ". - . .",
+			"m": "- -",
+			"n": "- .",
+			"o": "- - -",
+			"p": ". - - .",
+			"q": "- - . -",
+			"r": ". - .",
+			"s": ". . .",
+			"t": "-",
+			"u": ". . -",
+			"v": ". . . -",
+			"w": ". - -",
+			"x": "- . . -",
+			"y": "- . - -",
+			"z": "- - . .",
+			"1": ". - - - -",
+			"2": ". . - - -",
+			"3": ". . . - -",
+			"4": ". . . . -",
+			"5": ". . . . .",
+			"6": "- . . . .",
+			"7": "- - . . .",
+			"8": "- - - . .",
+			"9": "- - - - .",
+			"0": "- - - - -",
+			"\t": "       ",
+			" ": "       "}
+
+	morse_string = ""
+	for character in s:
+		if character.isalpha():
+			morse_string = morse_string + keys[character.lower()] + "   "
+		elif character.isdigit():
+			morse_string = morse_string + keys[character] + "   "
+		elif character in keys:
+			morse_string += keys[character]
+
+	return morse_string
+
+def to_tones(s):
+	tone_sequence = []
+	for c in s:
+		if c == ".":
+			tone_sequence.append(900.0)
+		elif c == "-":
+			tone_sequence.extend([900.0, 900.0, 900.0])
+		elif c == " ":
+			tone_sequence.append(1.0)
+
+	return tone_sequence
+
+input_string = raw_input("Write text to translate: ")
+morse_string = to_morse(input_string)
+print "This translates to: " + morse_string
+tone_sequence = to_tones(morse_string)
+
+fs = 44100
+p = pyaudio.PyAudio()
+stream = p.open(format=pyaudio.paFloat32,channels=1,rate=fs,output=True)
+
+for tone in tone_sequence:
+	play_tone(tone, 0.5, 0.1, fs, stream) # I encourage you to play with the tone duration
+
+stream.close()
+p.terminate()
