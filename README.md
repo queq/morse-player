@@ -14,7 +14,7 @@ Usage
 1. Open a Terminal window and go to the repository folder. Maybe you'll need to change permissions to the executable file (`$ chmod a+x morse-player`).
 2. Run it via `./morse-code` and then type whatever you want!
 <br>
-<img src="https://raw2.github.com/queq/morse-player/master/screenshots/dbe4.png"/>
+<img src="https://raw.githubusercontent.com/queq/morse-player/master/screenshots/dbe4.png"/>
 
 Issues
 ------
